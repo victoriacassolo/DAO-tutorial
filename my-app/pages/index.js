@@ -22,6 +22,7 @@ export default function Home() {
   const [nftBalance, setNftBalance] = useState(0);
   // Fake NFT Token ID to purchase. Used when creating a proposal.
   const [fakeNftTokenId, setFakeNftTokenId] = useState('');
+  const [proposal, setProposal] = useState('');
   // One of "Create Proposal" or "View Proposals"
   const [selectedTab, setSelectedTab] = useState('');
   // True if waiting for a transaction to be mined, false otherwise.
@@ -29,6 +30,8 @@ export default function Home() {
   // True if user has connected their wallet, false otherwise
   const [walletConnected, setWalletConnected] = useState(false);
   const web3ModalRef = useRef();
+
+  console.log(proposal);
 
   // Helper function to connect wallet
   const connectWallet = async () => {
@@ -82,14 +85,14 @@ export default function Home() {
     try {
       const signer = await getProviderOrSigner(true);
       const daoContract = getDaoContractInstance(signer);
-      const txn = await daoContract.createProposal(fakeNftTokenId);
+      const txn = await daoContract.createProposal(fakeNftTokenId, proposal);
       setLoading(true);
       await txn.wait();
       await getNumProposalsInDAO();
       setLoading(false);
     } catch (error) {
       console.error(error);
-      window.alert(error.data.message);
+      window.alert(error);
     }
   };
 
@@ -104,6 +107,7 @@ export default function Home() {
       const parsedProposal = {
         proposalId: id,
         nftTokenId: proposal.nftTokenId.toString(),
+        proposal: proposal.proposal.toString(),
         deadline: new Date(parseInt(proposal.deadline.toString()) * 1000),
         yayVotes: proposal.yayVotes.toString(),
         nayVotes: proposal.nayVotes.toString(),
@@ -269,6 +273,14 @@ export default function Home() {
             type="number"
             onChange={(e) => setFakeNftTokenId(e.target.value)}
           />
+          <div className={styles.container}>
+            <label>Proposal Text: </label>
+            <input
+              placeholder="Write your proposal here..."
+              type="text"
+              onChange={(e) => setProposal(e.target.value)}
+            />
+          </div>
           <button className={styles.button2} onClick={createProposal}>
             Create
           </button>
@@ -296,6 +308,8 @@ export default function Home() {
             <div key={index} className={styles.proposalCard}>
               <p>Proposal ID: {p.proposalId}</p>
               <p>Fake NFT to Purchase: {p.nftTokenId}</p>
+              <p>Proposal Text: {p.proposal}</p>
+              {console.log(p.proposal)}
               <p>Deadline: {p.deadline.toLocaleString()}</p>
               <p>Yay Votes: {p.yayVotes}</p>
               <p>Nay Votes: {p.nayVotes}</p>
@@ -371,7 +385,7 @@ export default function Home() {
           {renderTabs()}
         </div>
         <div>
-          <img className={styles.image} src="/cryptodevs/0.svg" />
+          <img className={styles.image} src="./0.svg" />
         </div>
       </div>
     </div>

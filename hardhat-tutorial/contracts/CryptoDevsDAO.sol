@@ -39,6 +39,8 @@ contract CryptoDevsDAO is Ownable {
     struct Proposal {
         // nftTokenId - the tokenID of the NFT to purchase from FakeNFTMarketplace if the proposal passes
         uint256 nftTokenId;
+        // proposal - type of proposal
+        string proposal;
         // deadline - the UNIX timestamp until which this proposal is active. Proposal can be executed after the deadline has been exceeded.
         uint256 deadline;
         // yayVotes - number of yay votes for this proposal
@@ -77,13 +79,14 @@ contract CryptoDevsDAO is Ownable {
     /// @dev createProposal allows a CryptoDevsNFT holder to create a new proposal in the DAO
     /// @param _nftTokenId - the tokenID of the NFT to be purchased from FakeNFTMarketplace if this proposal passes
     /// @return Returns the proposal index for the newly created proposal
-    function createProposal(uint256 _nftTokenId)
+    function createProposal(uint256 _nftTokenId, string memory _proposal)
         external
         nftHolderOnly
         returns (uint256)
     {
         require(nftMarketplace.available(_nftTokenId), "NFT_NOT_FOR_SALE");
         Proposal storage proposal = proposals[numProposals];
+        proposal.proposal = _proposal;
         proposal.nftTokenId = _nftTokenId;
         // Set the proposal's voting deadline to be (current time + 5 minutes)
         proposal.deadline = block.timestamp + 5 minutes;
